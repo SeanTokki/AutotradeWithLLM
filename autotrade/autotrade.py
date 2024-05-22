@@ -19,9 +19,9 @@ UPBIT_API_KEY = "UPBIT_API_KEY"
 
 def prepareNews():
     # get list of news from "coinness.com"
-    # news = helper.getCoinnessNews()
-    with open('test.txt', 'r') as file_data:
-        news = file_data.read()
+    news = helper.getCoinnessNews()
+    # with open('test.txt', 'r') as file_data:
+    #     news = file_data.read()
 
     news_instructions = helper.readFile("./instructions/news_organize_instructions.md")
 
@@ -130,6 +130,7 @@ def getAIAdvice():
 
     # create parser
     parser = createOutputParser()
+    output_format = parser.get_format_instructions()
 
     # create template
     template = createTemplate(examples)
@@ -141,11 +142,11 @@ def getAIAdvice():
         print(f"Error in starting a chatting with the LLM model: {e}")
 
     def getAdviceArgs(passthrough):
-        print(f"Organized News: {passthrough.content}")
+        print(f"Organized News:\n{passthrough.content}")
         
         advice_arguments = {
         "instructions": instructions, 
-        "output_format": parser.get_format_instructions(), 
+        "output_format": output_format, 
         "context": context,
         "realtime_data": realtime_data, 
         "historical_data": historical_data,
@@ -157,7 +158,7 @@ def getAIAdvice():
     # invoke LLM to get response
     chain = news_template | llm | RunnableLambda(getAdviceArgs) | template | llm | parser
     try:
-        response = chain.invoke({"news_instructions": news_instructions, "news": news})
+        response = chain.invoke({"news_instructions": news_instructions, "news": ' '.join(news)})
     except Exception as e:
         print(f"Error in analyzing data with LLM: {e}")
         return None
