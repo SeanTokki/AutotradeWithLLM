@@ -1,0 +1,10 @@
+pyupbit
+pandas_ta
+grpcio
+langchain
+langchain-google-genai
+fastapi
+schedule
+protobuf==4.25.3
+playwright
+beautifulsoup4

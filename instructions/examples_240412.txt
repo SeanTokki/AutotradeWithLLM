@@ -1,0 +1,19 @@
+{
+    "examples": [
+        {
+        "input1": '{"current_time": "2024-04-02 19:50:01", "orderbook": {...}, "btc_balance": 0.1, "krw_balance": 8000000, "btc_avg_price": 80000000}',
+        "input2": '{"index": [["daily", "2024-03-07 09:00:00"], ...], "columns": ["open", "high", "low", "close", "volume", ...], "data": [...]}',
+        "output": '{"decision": "hold", "ratio": 100, "reason": "The market is currently experiencing choppy price movements with no clear upward or downward trend. The RSI is hovering around 50, indicating neither overbought nor oversold conditions. Given the uncertainty, it is recommended to hold both the current Bitcoin holding and KRW balance for now. Monitor the market closely for any emerging trends or signals that provide a clearer buying or selling opportunity."}',
+        },
+        {
+        "input1": '{"current_time": "2024-03-20 12:00:00", "orderbook": {...}, "btc_balance": 0.25, "krw_balance": 5000000, "btc_avg_price": 85000000}',
+        "input2": '{"index": [["daily", "2024-02-23 09:00:00"], ...], "columns": ["open", "high", "low", "close", "volume", ...], "data": [...]}',
+        "output": '{"decision": "sell", "ratio": 75, "reason": "The market trend suggests a bearish turn with a price decrease over the past 5 minutes. Additionally, the trading volume is low, indicating a potential lack of buying pressure. To minimize potential losses, it is recommended to sell 75% of the current Bitcoin holding at the current market price."}',
+        },
+        {
+        "input1": '{"current_time": "2024-03-25 20:10:07", "orderbook": {...}, "btc_balance": 0.05, "krw_balance": 7500000, "btc_avg_price": 90000000}',
+        "input2": '{"index": [["daily", "2024-02-28 09:00:00"], ...], "columns": ["open", "high", "low", "close", "volume", ...], "data": [...]}',
+        "output": '{"decision": "buy", "ratio": 30, "reason": "The market indicates a potential bullish breakout. The price recently touched a support level and surged with a significant increase in volume, suggesting strong buying pressure. It is recommended to buy 30% of the available KRW worth of Bitcoin to capitalize on this potential opportunity."}',
+        }
+    ]
+}

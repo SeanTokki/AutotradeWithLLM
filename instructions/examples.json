@@ -1,0 +1,17 @@
+[
+  {
+    "decision": "buy",
+    "ratio": 50,
+    "reason": "The recent historical data shows a positive trend with the 5-minute and hourly closing prices consistently above the EMA_10, indicating a strong upward momentum. The RSI_14 is currently at 45, which suggests that the market is not overbought yet. Additionally, the MACD line is above the signal line, further indicating a bullish trend. The order book reveals a strong support level at the current bid price with a significant volume of buy orders. Although recent news highlights regulatory and economic challenges, the overall sentiment remains positive due to Bitcoin's perception as a hedge against inflation. Therefore, investing 50% of the available KRW balance in Bitcoin is a calculated risk, taking into account the upward trend and market support."
+  },
+  {
+    "decision": "sell",
+    "ratio": 30,
+    "reason": "Current market analysis indicates that the RSI_14 is at 75, signaling an overbought condition which could lead to a price correction. The MACD has started to converge with the signal line, suggesting a potential bearish reversal. Additionally, the Bollinger Bands show the price is nearing the upper band, which often precedes a pullback. The latest news about regulatory uncertainties and economic challenges also adds to the bearish sentiment. Therefore, it is prudent to sell 30% of the current Bitcoin holdings to mitigate potential losses while still holding a majority position in case the trend resumes."
+  },
+  {
+    "decision": "hold",
+    "ratio": 100,
+    "reason": "The historical market data presents a mixed scenario with the closing price hovering around the EMA_10 and the RSI_14 at a neutral 50 level. The MACD indicator is showing no clear trend, and the Bollinger Bands are relatively narrow, indicating low market volatility. The order book does not present any significant buy or sell pressure, suggesting a stable market. Given the recent news about regulatory and economic uncertainties, it is best to adopt a cautious approach. Therefore, holding the current position without making any significant trades is advisable to observe further market developments and avoid potential risks."
+  }
+]
