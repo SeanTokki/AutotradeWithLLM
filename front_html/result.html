@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Autotrade Results</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background-color: #f4f4f4;
+      }
+      header {
+        width: 100%;
+        background-color: #333;
+        color: white;
+        text-align: center;
+        padding: 10px 0;
+      }
+      .container {
+        padding: 20px;
+        background-color: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      .table-container {
+        max-height: 200px;
+        overflow-y: scroll;
+        margin: 20px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .home-button {
+        padding: 10px 20px;
+        margin: 10px;
+        background-color: #333;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      .table-title {
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>Autotrade Results</header>
+      <button class="home-button" onclick="location.href='.'">Home</button>
+      <div class="table-container">
+        <div class="table-title">AI Recommendations</div>
+        <table>
+          <thead>
+            <tr>
+              <th>id</th>
+              <th>timestamp</th>
+              <th>decision</th>
+              <th>ratio</th>
+              <th>reason</th>
+              <th>result</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data1 %}
+            <tr>
+              {% for cell in row %}
+              <td>{{ cell }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="table-container">
+        <div class="table-title">Asset History</div>
+        <table>
+          <thead>
+            <tr>
+              <th>id</th>
+              <th>timestamp</th>
+              <th>btc balance</th>
+              <th>btc_avg_price</th>
+              <th>btc_price</th>
+              <th>krw_balance</th>
+              <th>total_asset</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data2 %}
+            <tr>
+              {% for cell in row %}
+              <td>{{ cell }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

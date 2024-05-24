@@ -1,279 +1,92 @@
-<!--
-// v0 by Vercel.
-// https://v0.dev/t/Pw2iZxjZlEx
--->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Autotrade with LLM</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background-color: #f4f4f4;
+      }
+      header {
+        width: 100%;
+        background-color: #333;
+        color: white;
+        text-align: center;
+        padding: 10px 0;
+      }
+      .container {
+        padding: 20px;
+        background-color: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      .toggle-button,
+      .result-button {
+        padding: 10px 20px;
+        margin: 10px;
+        background-color: #333;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header id="status-header">
+        {{ 'Autotrading...' if is_autotrading else 'Autotrade not working...' }}
+      </header>
+      <button id="toggle-button" class="toggle-button">
+        {{ 'Stop' if is_autotrading else 'Start' }}
+      </button>
+      <button class="result-button" onclick="location.href='result'">
+        Go to Results
+      </button>
+    </div>
 
-<style>h1, h2, h3, h4, h5, h6 { font-family: 'Libre Franklin', sans-serif; --font-sans: 'Libre Franklin'; }
-</style>
-<style>body { font-family: 'Rubik', sans-serif; --font-sans: 'Rubik'; }
-</style>
-<div class="flex flex-col min-h-screen">
-  <header class="bg-blue-900 text-white py-4 px-6 flex items-center justify-between">
-    <div class="flex items-center gap-4">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="h-6 w-6"
-      >
-        <path d="M3 3v18h18"></path>
-        <path d="m19 9-5 5-4-4-3 3"></path>
-      </svg>
-      <h1 class="text-xl font-bold">Kim Minjun's Dashboard</h1>
-    </div>
-    <div class="flex items-center gap-4">
-      <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent h-10 w-10 text-gray-400 hover:text-gray-300">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="h-5 w-5"
-        >
-          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
-          <path d="M21 3v5h-5"></path>
-          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
-          <path d="M8 16H3v5"></path>
-        </svg>
-        <span class="sr-only">Refresh</span>
-      </button>
-      <button
-        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent h-10 w-10 text-gray-400 hover:text-gray-300"
-        type="button"
-        id="radix-:r0:"
-        aria-haspopup="menu"
-        aria-expanded="false"
-        data-state="closed"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="h-5 w-5"
-        >
-          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
-          <circle cx="12" cy="12" r="3"></circle>
-        </svg>
-        <span class="sr-only">Settings</span>
-      </button>
-    </div>
-  </header>
-  <main class="flex-1 bg-gray-100 dark:bg-gray-900 p-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="rounded-lg border text-card-foreground bg-white dark:bg-gray-800 shadow-md" data-v0-t="card">
-        <div class="flex flex-col space-y-1.5 p-6">
-          <h3 class="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">
-            Recent Trading Results
-          </h3>
-        </div>
-        <div class="p-6">
-          <div class="aspect-[4/3]">
-            <div style="width: 100%; height: 100%;"></div>
-          </div>
-        </div>
-      </div>
-      <div class="rounded-lg border text-card-foreground bg-white dark:bg-gray-800 shadow-md" data-v0-t="card">
-        <div class="flex flex-col space-y-1.5 p-6">
-          <h3 class="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">
-            Portfolio Performance
-          </h3>
-        </div>
-        <div class="p-6">
-          <div class="aspect-[4/3]">
-            <div style="width: 100%; height: 100%;"></div>
-          </div>
-        </div>
-      </div>
-      <div class="rounded-lg border text-card-foreground bg-white dark:bg-gray-800 shadow-md" data-v0-t="card">
-        <div class="flex flex-col space-y-1.5 p-6">
-          <h3 class="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">Market Alerts</h3>
-        </div>
-        <div class="p-6">
-          <div class="space-y-4">
-            <div class="bg-blue-100 dark:bg-blue-900 rounded-md p-4">
-              <div class="text-blue-900 dark:text-blue-100 font-bold">Significant Market Volatility</div>
-              <div class="text-gray-500 dark:text-gray-400">
-                The market has experienced a significant increase in volatility over the past 24 hours. Recommended
-                to review your portfolio and consider adjusting your risk exposure.
-              </div>
-            </div>
-            <div class="bg-green-100 dark:bg-green-900 rounded-md p-4">
-              <div class="text-green-900 dark:text-green-100 font-bold">New Investment Opportunity</div>
-              <div class="text-gray-500 dark:text-gray-400">
-                A new investment opportunity in the renewable energy sector has been identified. Consider allocating
-                a portion of your portfolio to take advantage of this trend.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="rounded-lg border text-card-foreground bg-white dark:bg-gray-800 shadow-md" data-v0-t="card">
-        <div class="flex flex-col space-y-1.5 p-6">
-          <h3 class="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">Key Metrics</h3>
-        </div>
-        <div class="p-6 grid grid-cols-2 gap-4">
-          <div class="bg-gray-100 dark:bg-gray-700 rounded-md p-4">
-            <div class="text-2xl font-bold text-blue-900 dark:text-blue-100">$12,345</div>
-            <div class="text-gray-500 dark:text-gray-400">Total Profit</div>
-          </div>
-          <div class="bg-gray-100 dark:bg-gray-700 rounded-md p-4">
-            <div class="text-2xl font-bold text-blue-900 dark:text-blue-100">85%</div>
-            <div class="text-gray-500 dark:text-gray-400">Win Rate</div>
-          </div>
-          <div class="bg-gray-100 dark:bg-gray-700 rounded-md p-4">
-            <div class="text-2xl font-bold text-blue-900 dark:text-blue-100">$45,678</div>
-            <div class="text-gray-500 dark:text-gray-400">Total Investment</div>
-          </div>
-          <div class="bg-gray-100 dark:bg-gray-700 rounded-md p-4">
-            <div class="text-2xl font-bold text-blue-900 dark:text-blue-100">12</div>
-            <div class="text-gray-500 dark:text-gray-400">Active Strategies</div>
-          </div>
-        </div>
-      </div>
-      <div
-        class="rounded-lg border text-card-foreground bg-white dark:bg-gray-800 shadow-md col-span-2"
-        data-v0-t="card"
-      >
-        <div class="flex flex-col space-y-1.5 p-6">
-          <h3 class="whitespace-nowrap text-2xl font-semibold leading-none tracking-tight">Trade History</h3>
-        </div>
-        <div class="p-6">
-          <div class="relative w-full overflow-auto">
-            <table class="w-full caption-bottom text-sm">
-              <thead class="[&amp;_tr]:border-b">
-                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                    Date
-                  </th>
-                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                    Symbol
-                  </th>
-                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                    Type
-                  </th>
-                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                    Price
-                  </th>
-                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                    Quantity
-                  </th>
-                  <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                    P/L
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="[&amp;_tr:last-child]:border-0">
-                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">2023-04-18</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">AAPL</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">Buy</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">$125.50</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">100</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0 text-green-500">+$1,250</td>
-                </tr>
-                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">2023-04-17</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">MSFT</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">Sell</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">$280.00</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">50</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0 text-red-500">-$500</td>
-                </tr>
-                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">2023-04-16</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">AMZN</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">Buy</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">$105.75</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0">75</td>
-                  <td class="p-4 align-middle [&amp;:has([role=checkbox])]:pr-0 text-green-500">+$750</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </main>
-  <nav class="bg-blue-900 text-white py-4 px-6 flex items-center justify-between">
-    <div class="flex items-center gap-4">
-      <a class="flex items-center gap-2 hover:underline" href="#">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="h-5 w-5"
-        >
-          <path d="M3 3v18h18"></path>
-          <path d="m19 9-5 5-4-4-3 3"></path>
-        </svg>
-        <span>Autotrade Result</span>
-      </a>
-      <a class="flex items-center gap-2 hover:underline" href="#">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="h-5 w-5"
-        >
-          <circle cx="13.5" cy="6.5" r=".5"></circle>
-          <circle cx="17.5" cy="10.5" r=".5"></circle>
-          <circle cx="8.5" cy="7.5" r=".5"></circle>
-          <circle cx="6.5" cy="12.5" r=".5"></circle>
-          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
-        </svg>
-        <span>Scenario Simulation</span>
-      </a>
-    </div>
-    <div class="flex items-center gap-4">
-      <a class="flex items-center gap-2 hover:underline" href="#">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="h-5 w-5"
-        >
-          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
-          <circle cx="12" cy="12" r="3"></circle>
-        </svg>
-        <span>Settings</span>
-      </a>
-    </div>
-  </nav>
-</div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const statusHeader = document.getElementById("status-header");
+        const toggleButton = document.getElementById("toggle-button");
+
+        function updateStatus() {
+          fetch("/proxy/8000/get-state", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              statusHeader.textContent = data.isAutoTrading
+                ? "Autotrading..."
+                : "Autotrade not working...";
+              toggleButton.textContent = data.isAutoTrading ? "Stop" : "Start";
+            });
+        }
+
+        updateStatus();
+
+        toggleButton.addEventListener("click", function () {
+          fetch("/proxy/8000/toggle-state", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then(() => updateStatus());
+        });
+      });
+    </script>
+  </body>
+</html>
