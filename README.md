@@ -96,6 +96,13 @@
 - 결국 RunnableLambda를 통해서 arguments를 추가하는 사용자 정의 함수를 chain 사이에 집어넣음으로써 해결.
 - fewshot example에 양질의 예제를 집어넣기 위해 gpt-4o를 사용하여 주어진 모든 자료를 활용하여 판단 근거를 제시하는 example을 만들어냄.
 
+## 2024.05.24.
+- 본격적인 frontend 코딩에 앞서서 GPT를 활용해서 간단한 테스팅에 사용할 FastAPI - html 코드를 만들어냄.
+- 백엔드로 파이썬 프레임워크를 선택한 이유는 자동매매를 파이썬 프로그램으로 코딩했기 때문에 서버상에서 프로그램을 실행/종료 시키기 용이하기 때문.
+- 자세한 이유는 모르지만 vs-server 환경 문제로 html에서 fetch시에 /proxy/8000을 추가함으로서 not allowed method 문제 해결.
+- 버튼을 누르면 전역변수가 바뀌도록 코딩. 추후 autotrade.py 파일 실행과 종료의 트리거로 쓰일 예정.
+- aws server에 올려서 오랜기간 테스팅하고 그 결과를 지켜볼 예정.
+
 
 ## Todo
 - exception handling... -> 에러가 떠도 프로그램이 종료되지 않도록
