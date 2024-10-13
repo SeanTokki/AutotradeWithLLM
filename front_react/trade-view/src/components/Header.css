@@ -1,0 +1,19 @@
+.header {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header nav a {
+    margin: 0 1rem;
+    text-decoration: none;
+    color: #8cc2fd;
+    font-weight: normal;
+}
+
+.header nav .active {
+    font-weight: bold;
+    color: #007bff;
+}

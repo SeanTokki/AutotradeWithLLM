@@ -1,0 +1,54 @@
+/* 테이블 컨테이너 */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 2rem auto;
+    max-width: 1200px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* 테이블 스타일 */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+    color: #333;
+}
+
+.table th,
+.table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+/* 헤더 스타일 */
+.table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #555;
+    text-align: center;
+}
+
+/* 짝수 행과 홀수 행의 배경색 구분 */
+.table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* 테이블 행 호버 효과 */
+.table tbody tr:hover {
+    background-color: #e9f5ff;
+    cursor: pointer;
+}
+
+/* 테이블 데이터 정렬 */
+.table th:first-child,
+.table td:first-child {
+    text-align: left;
+}
+
+.table th:last-child,
+.table td:last-child {
+    text-align: right;
+}
