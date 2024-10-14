@@ -1,16 +1,28 @@
 .header {
+    background-color: #f8f9fa;
+    padding: 10px 20px;
     display: flex;
     justify-content: center;
-    padding: 1rem;
-    background-color: #f8f9fa;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    align-items: center;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header nav {
+    display: flex;
+    gap: 20px;
 }
 
 .header nav a {
-    margin: 0 1rem;
-    text-decoration: none;
     color: #8cc2fd;
-    font-weight: normal;
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 8px 12px;
+    transition: color 0.3s ease;
+}
+
+.header nav a:hover {
+    color: #007bff;
 }
 
 .header nav .active {

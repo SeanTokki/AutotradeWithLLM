@@ -1,9 +1,9 @@
 /* 테이블 컨테이너 */
 .table-container {
-    width: 100%;
-    overflow-x: auto;
-    margin: 2rem auto;
-    max-width: 1200px;
+    width: 90%;
+    height: 600px;
+    overflow: auto;
+    margin: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
 }

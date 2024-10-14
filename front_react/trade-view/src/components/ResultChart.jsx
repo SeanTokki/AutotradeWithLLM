@@ -1,38 +1,53 @@
 import React, { useState, useEffect } from "react";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
+import api from "../services/api.jsx";
+import { ResponsiveContainer, LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import "./ResultChart.css";
-
-// generating data for just test
-function generateRandomData(numPoints) {
-    const data = [];
-    const currentTime = new Date();
-    for (let i = 0; i < numPoints; i++) {
-        const time = new Date(currentTime.getTime() - i * 60 * 60 * 1000 * 4); // 4시간 간격
-        const price = Math.round(50000 + Math.random() * 5000); // 임의의 가격 생성
-        data.push({ time: time.toLocaleTimeString(), price });
-    }
-    return data.reverse();
-}
 
 const ResultChart = () => {
     const [data, setData] = useState([]);
 
-    // Initial api request for data
+    // Initial api request for chart data
     useEffect(() => {
-        // api.get("/data")
-        //     .then((response) => setData(response.data.data))
-        //     .catch((error) => console.error(error));
-        setData(generateRandomData(20));
+        api.get("/chartData")
+            .then((response) => setData(response.data.data))
+            .catch((error) => console.error(error));
     }, []);
 
+    const CustomizedDot = ({ cx, cy, stroke, payload, value }) => {
+        if (payload.decision === "sell") {
+            return <circle cx={cx} cy={cy} r={5} fill="green" />;
+        } else if (payload.decision === "buy") {
+            return <circle cx={cx} cy={cy} r={5} fill="red" />;
+        } else {
+            return <circle cx={cx} cy={cy} r={5} fill="gray" />;
+        }
+    };
+
+    const CustomTooltip = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+            const data = payload[0].payload;
+            return (
+                <div className="custom-tooltip">
+                    <p className="main">{`BTC Price : ${data.btc_price.toLocaleString("ko-KR")}￦`}</p>
+                    <p className="sub">{`Timestamp: ${data.timestamp}`}</p>
+                    <p className="sub">{`AI Decision : ${data.decision.toUpperCase()} ${data.ratio * 100}%`}</p>
+                </div>
+            );
+        }
+
+        return null;
+    };
+
     return (
-        <LineChart width={600} height={300} data={data}>
-            <Line type="monotone" dataKey="price" stroke="#8884d8" />
-            <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-            <XAxis dataKey="time" />
-            <YAxis type="number" domain={["auto", "auto"]} />
-            <Tooltip />
-        </LineChart>
+        <ResponsiveContainer width="90%" height={300}>
+            <LineChart data={data} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+                <Line type="monotone" dataKey="btc_price" stroke="black" dot={<CustomizedDot />} />
+                <CartesianGrid strokeDasharray="5 5" />
+                <XAxis dataKey="timestamp" />
+                <YAxis dataKey="btc_price" type="number" domain={["auto", "auto"]} />
+                <Tooltip content={<CustomTooltip />} />
+            </LineChart>
+        </ResponsiveContainer>
     );
 };
 

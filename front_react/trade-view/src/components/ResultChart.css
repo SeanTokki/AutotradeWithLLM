@@ -1,19 +1,17 @@
-.chart-container {
+.custom-tooltip {
     width: 100%;
-    max-width: 800px;
-    height: 400px;
-    margin: 2rem auto;
-    padding: 1rem;
-    background-color: #f8f9fa;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    background-color: #f8f9fa;
 }
 
-.chart-container h2 {
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
+.custom-tooltip .main {
+    font-weight: bold;
+    font-size: 0.9rem;
     color: #333;
+}
+
+.custom-tooltip .sub {
+    font-size: 0.8rem;
+    color: #757474;
 }
