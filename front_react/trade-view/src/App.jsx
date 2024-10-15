@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import Header from "./components/Header.jsx";
-import StatusPage from "./components/StatusPage.jsx";
-import ResultPage from "./components/ResultPage.jsx";
-import BacktestingPage from "./components/BacktestingPage.jsx";
-import ReportPage from "./components/ReportPage.jsx";
+import StatusPage from "./pages/StatusPage.jsx";
+import ResultPage from "./pages/ResultPage.jsx";
+import BacktestingPage from "./pages/BacktestingPage.jsx";
+import ReportPage from "./pages/ReportPage.jsx";
 
 function App() {
     return (

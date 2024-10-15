@@ -1,0 +1,30 @@
+/* .container {
+    padding: 20px;
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+} */
+
+.input-container {
+    width: 50%;
+}
+
+.input-container textarea {
+    width: 100%;
+    padding: 5px 0px;
+    font-size: 1em;
+    border: 1px solid #FFC17F;
+    border-radius: 4px;
+    resize: none;
+    overflow: hidden;
+    transition: border-color 0.3s;
+    outline-color: #FF8300;
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
