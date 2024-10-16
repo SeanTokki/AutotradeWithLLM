@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 import json
 import time
 import schedule
-from datetime import datetime
 from langchain_google_vertexai import ChatVertexAI
 from langchain.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
 from langchain_core.runnables import RunnableLambda
@@ -11,6 +10,7 @@ from langchain_core.runnables import RunnableLambda
 # from langchain_core.output_parsers import JsonOutputParser
 # from langchain_core.pydantic_v1 import BaseModel, Field
 # from typing import Union
+# from datetime import datetime
 
 # import from my codes
 from asset import AssetforTest
@@ -26,7 +26,7 @@ def prepareNews():
     # with open('test.txt', 'r') as file_data:
     #     news = file_data.read()
 
-    news_instructions = helper.readFile("../instructions/news_organize_instructions.md")
+    news_instructions = helper.readFile("./instructions/news_organize_instructions.md")
 
     news_template = ChatPromptTemplate.from_messages(
             [
@@ -38,8 +38,8 @@ def prepareNews():
     return news, news_instructions, news_template
 
 def prepareSystemPrompt():
-    instructions = helper.readFile("../instructions/instructions.md")
-    context = helper.readFile("../instructions/context_240405.md")
+    instructions = helper.readFile("./instructions/instructions.md")
+    context = helper.readFile("./instructions/context.md")
     # ex_outputs = helper.readJSON("./instructions/examples.json")
     examples = [
         {
@@ -94,8 +94,6 @@ def createTemplate(examples):
     # prompt template
     template = ChatPromptTemplate.from_messages(
         [
-            # ("system", "Instruction: {instructions}\nContext: {context}{news_data}\nOutput format: {output_format}"),
-            # ("system", "{instructions}\n\n{context}{news_data}\n\n# Output format\n\n{output_format}"),
             ("system", "{instructions}\n\n{context}{news_data}"),
             few_shot_prompt,
             ("human","JSON Data 1: {realtime_data}\nJSON Data 2: {historical_data}"),
@@ -156,7 +154,6 @@ def getAIAdvice():
         
         advice_arguments = {
         "instructions": instructions, 
-        # "output_format": output_format, 
         "context": context,
         "realtime_data": realtime_data, 
         "historical_data": historical_data,
@@ -166,7 +163,7 @@ def getAIAdvice():
         return advice_arguments
 
     # invoke LLM to get response
-    chain = news_template | llm | RunnableLambda(getAdviceArgs) | recommendation_template | structured_llm # | parser
+    chain = news_template | llm | RunnableLambda(getAdviceArgs) | recommendation_template | structured_llm
     try:
         response = chain.invoke({"news_instructions": news_instructions, "news": ' '.join(news)})
     except Exception as e:
@@ -209,12 +206,12 @@ def main():
     DB.dropAllTable()
     DB.createTables()
 
+    # operate trading every hours
     autotrade()
-    # schedule.every(30).minutes.do(autotrade)
-    # # operate trading every thirty minutes
-    # while True:
-    #     schedule.run_pending()
-    #     time.sleep(1)
+    schedule.every().hours.do(autotrade)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
 if __name__ == '__main__':
     main()

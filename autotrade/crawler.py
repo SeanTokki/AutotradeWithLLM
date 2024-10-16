@@ -1,6 +1,6 @@
 from playwright.sync_api import sync_playwright
 from playwright.async_api import async_playwright
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 import asyncio
 import time
 
