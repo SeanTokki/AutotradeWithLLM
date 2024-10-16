@@ -6,7 +6,9 @@
 /test.txt
 /trading_history.db
 /.venv
+/autotrade/__pycache__
 /autotrade/.env
 /autotrade/gen-lang-client-0995260521-90505c12cf8c.json
 /autotrade/test.py
 /autotrade/.venv
+/back_fastapi/.venv
