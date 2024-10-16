@@ -1,24 +1,24 @@
+# import os
+from dotenv import load_dotenv
 import json
 import time
 import schedule
 from datetime import datetime
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_vertexai import ChatVertexAI
 from langchain.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
-from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.runnables import RunnableLambda
-import os
-from dotenv import load_dotenv
+# from langchain_google_genai import ChatGoogleGenerativeAI
+# from langchain_core.output_parsers import JsonOutputParser
+# from langchain_core.pydantic_v1 import BaseModel, Field
+# from typing import Union
 
 # import from my codes
 from asset import AssetforTest
 from DB import Database as DB
 import helper
 
-# API key setup
-load_dotenv("env/.env")
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-UPBIT_API_KEY = os.getenv("UPBIT_API_KEY")
+# load environment
+load_dotenv()
 
 def prepareNews():
     # get list of news from "coinness.com"
@@ -26,20 +26,20 @@ def prepareNews():
     # with open('test.txt', 'r') as file_data:
     #     news = file_data.read()
 
-    news_instructions = helper.readFile("./instructions/news_organize_instructions.md")
+    news_instructions = helper.readFile("../instructions/news_organize_instructions.md")
 
     news_template = ChatPromptTemplate.from_messages(
             [
                 ("system", "Instruction: {news_instructions}"),
-                ("user","Input: {news}"),
+                ("human","Input: {news}"),
             ]
     )
 
     return news, news_instructions, news_template
 
 def prepareSystemPrompt():
-    instructions = helper.readFile("./instructions/instructions.md")
-    context = helper.readFile("./instructions/context_240405.md")
+    instructions = helper.readFile("../instructions/instructions.md")
+    context = helper.readFile("../instructions/context_240405.md")
     # ex_outputs = helper.readJSON("./instructions/examples.json")
     examples = [
         {
@@ -78,20 +78,6 @@ def prepareData():
 
     return realtime_data, historical_data
 
-def createOutputParser():
-    # desired output format
-    class Recommendation(BaseModel):
-        """The most complete AI recommendation for trading BTC in the current situation."""
-        
-        decision: str = Field(description="Your decision whether to buy, sell or hold BTC.")
-        ratio: int = Field(description="The percentage of assets you decide to buy or sell. It should be an integer between 0 and 100. If the decision is hold, ratio should be 100")
-        reason: str = Field(description='''Detailed logical reason for your recommendation. 
-        It should be created in consideration of all provided data, including Context, Latest Bitcoin News, Historical Market Analysis Data, Orderbook, Asset Information, etc.''')
-    
-    parser = JsonOutputParser(pydantic_object=Recommendation)
-
-    return parser
-
 def createTemplate(examples):
     # few-shot template
     example_prompt = ChatPromptTemplate.from_messages(
@@ -109,9 +95,10 @@ def createTemplate(examples):
     template = ChatPromptTemplate.from_messages(
         [
             # ("system", "Instruction: {instructions}\nContext: {context}{news_data}\nOutput format: {output_format}"),
-            ("system", "{instructions}\n\n{context}{news_data}\n\n# Output format\n\n{output_format}"),
+            # ("system", "{instructions}\n\n{context}{news_data}\n\n# Output format\n\n{output_format}"),
+            ("system", "{instructions}\n\n{context}{news_data}"),
             few_shot_prompt,
-            ("user","JSON Data 1: {realtime_data}\nJSON Data 2: {historical_data}"),
+            ("human","JSON Data 1: {realtime_data}\nJSON Data 2: {historical_data}"),
         ]
     )
 
@@ -127,25 +114,49 @@ def getAIAdvice():
     # prepare data
     realtime_data, historical_data = prepareData()
 
-    # create parser
-    parser = createOutputParser()
-    output_format = parser.get_format_instructions()
-
     # create template
-    template = createTemplate(examples)
+    recommendation_template = createTemplate(examples)
+
+    # desired output format
+    json_recommendation_schema = {
+        "title": "recommendation",
+        "description": "The most complete AI recommendation for trading BTC in the current situation.",
+        "type": "object",
+        "properties": {
+            "decision": {
+                "type": "string",
+                "description": "Your decision whether to buy, sell or hold BTC.",
+            },
+            "ratio": {
+                "type": "integer",
+                "description": '''The percentage of assets you decide to buy or sell. 
+                           It should be an integer between 0 and 100. If the decision is hold, ratio should be 100.''',
+            },
+            "reason": {
+                "type": "string",
+                "description": '''Detailed logical reason for your recommendation. 
+                            It should be created in consideration of all provided data.''',
+            },
+        },
+        "required": ["decision", "ratio", "reason"],
+    }
 
     # initialize llm object
     try:
-        llm = ChatGoogleGenerativeAI(model='gemini-1.5-pro', convert_system_message_to_human=True, google_api_key=GOOGLE_API_KEY)
+        # llm = ChatGoogleGenerativeAI(model='gemini-1.5-pro', google_api_key=GOOGLE_API_KEY)
+        llm = ChatVertexAI(model='gemini-1.5-flash')
     except Exception as e:
         print(f"Error in starting a chatting with the LLM model: {e}")
+
+    # new model with structured output
+    structured_llm = llm.with_structured_output(json_recommendation_schema)
 
     def getAdviceArgs(passthrough):
         print(f"Organized News:\n{passthrough.content}")
         
         advice_arguments = {
         "instructions": instructions, 
-        "output_format": output_format, 
+        # "output_format": output_format, 
         "context": context,
         "realtime_data": realtime_data, 
         "historical_data": historical_data,
@@ -155,22 +166,16 @@ def getAIAdvice():
         return advice_arguments
 
     # invoke LLM to get response
-    chain = news_template | llm | RunnableLambda(getAdviceArgs) | template | llm | parser
+    chain = news_template | llm | RunnableLambda(getAdviceArgs) | recommendation_template | structured_llm # | parser
     try:
         response = chain.invoke({"news_instructions": news_instructions, "news": ' '.join(news)})
     except Exception as e:
         print(f"Error in analyzing data with LLM: {e}")
         return None
 
-    # check if the response is well-formatted
-    response = helper.checkFormat(response)
-    if response is not None:
-        # insert recommendation into DB
-        DB.insertIntoRecommendation(response)
-        return response
-    else:
-        print(f"AI response is not well-formatted. The original response: {response}")
-        return None
+    # insert recommendation into DB
+    DB.insertIntoRecommendation(response)
+    return response
 
 def autotrade(): 
     # get AI advice, there are 3 chances to make well-formatted advice.
@@ -188,9 +193,9 @@ def autotrade():
     ratio = decision.get('ratio')
     print(f"AI response:\n{decision}\n")
     if decision.get('decision') == "buy":
-        AssetforTest.executeBuy(ratio)  # executeBuy(ratio)
+        AssetforTest.executeBuy(ratio)  # helper.executeBuy(ratio)
     elif decision.get('decision') == "sell":
-        AssetforTest.executeSell(ratio)  # executeSell(ratio)
+        AssetforTest.executeSell(ratio)  # helper.executeSell(ratio)
     else:
         AssetforTest.executeHold()
 

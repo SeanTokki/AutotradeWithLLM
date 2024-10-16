@@ -3,7 +3,7 @@ import sqlite3
 class Database():
     @staticmethod
     def initConnection():
-        conn = sqlite3.connect('./trading_history.db')
+        conn = sqlite3.connect('../trading_history.db')
         cursor = conn.cursor()
 
         return conn, cursor

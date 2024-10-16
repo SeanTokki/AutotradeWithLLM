@@ -14,8 +14,8 @@ def getRealtimeData():
     # get current orderbook
     orderbook = pyupbit.get_orderbook(ticker="KRW-BTC")
     del orderbook['level']
-    current_time = datetime.utcfromtimestamp(orderbook['timestamp']//1000)  # remove millisecond time
-    current_time = current_time + timedelta(hours=9)  # UTC to KST
+    current_time = datetime.fromtimestamp(orderbook['timestamp']//1000)  # remove millisecond time
+    # current_time = current_time + timedelta(hours=9)  # UTC to KST
     current_time = str(current_time)  # dateTime obj to str
     del orderbook['timestamp']
 
@@ -38,10 +38,10 @@ def getHistoricalData():
     # get market data(OHLCV)
     df_daily = pyupbit.get_ohlcv("KRW-BTC", "day", count=60)
     df_hourly = pyupbit.get_ohlcv("KRW-BTC", interval="minute60", count=60)
-    df_fivemin = pyupbit.get_ohlcv("KRW-BTC", interval="minute5", count=60)
+    # df_fivemin = pyupbit.get_ohlcv("KRW-BTC", interval="minute5", count=60)
 
     # save last candle's close price as current btc price
-    btc_price = df_fivemin.iloc[59].iloc[3]
+    btc_price = df_hourly.iloc[-1].iloc[3]
 
     # helper function to arrange the dataset
     def arrangeDF(df):
@@ -57,6 +57,7 @@ def getHistoricalData():
                 {"kind": "bbands", "length" : 20, "std" : 2},
             ]
         )
+        df.ta.cores = 0 # no multiprocessing
         df.ta.strategy(CustomStrategy)
         df = df.drop('MACDh_12_26_9', axis=1)
         df = df.drop('BBB_20_2.0', axis=1)
@@ -68,10 +69,10 @@ def getHistoricalData():
     # arange the datasets
     df_daily = arrangeDF(df_daily)
     df_hourly = arrangeDF(df_hourly)
-    df_fivemin = arrangeDF(df_fivemin)
+    # df_fivemin = arrangeDF(df_fivemin)
 
     # gather the datasets in one dictionary
-    historical_data = pd.concat([df_daily, df_hourly, df_fivemin], keys=['daily', 'hourly', 'fivemin'])
+    historical_data = pd.concat([df_daily, df_hourly], keys=['daily', 'hourly'])
     historical_data = historical_data.to_dict(orient='split')
 
     return historical_data, btc_price

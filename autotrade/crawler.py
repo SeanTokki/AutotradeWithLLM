@@ -64,12 +64,12 @@ async def _asyncFetch(urls):
     return contents
 
 def asyncFetchWithPlaywright(urls):
+    contents = asyncio.run(_asyncFetch(urls))
+    
     # Due to the server specifications, at most 2 crawler will be active at a time.
-    # contents = asyncio.run(asyncFetch(urls))
-    bundled_urls = [[x, y] for x, y in zip(urls[0::2], urls[1::2])]
-    #print(bundled_urls)
-    contents = []
-    for bundle in bundled_urls:
-        contents.extend(asyncio.run(_asyncFetch(bundle)))
+    # bundled_urls = [[x, y] for x, y in zip(urls[0::2], urls[1::2])]
+    # contents = []
+    # for bundle in bundled_urls:
+    #     contents.extend(asyncio.run(_asyncFetch(bundle)))
 
     return contents
