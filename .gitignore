@@ -6,3 +6,4 @@
 /test.txt
 /trading_history.db
 /.venv
+/autotrade/env/.env

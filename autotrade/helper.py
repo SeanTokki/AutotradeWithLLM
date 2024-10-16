@@ -2,7 +2,7 @@ import pyupbit
 from datetime import datetime, timedelta
 import pandas as pd
 import pandas_ta as ta
-from langchain_community.document_loaders import AsyncChromiumLoader
+# from langchain_community.document_loaders import AsyncChromiumLoader
 from bs4 import BeautifulSoup
 import json
 

@@ -7,6 +7,8 @@ from langchain.prompts import ChatPromptTemplate, FewShotChatMessagePromptTempla
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.runnables import RunnableLambda
+import os
+from dotenv import load_dotenv
 
 # import from my codes
 from asset import AssetforTest
@@ -14,8 +16,9 @@ from DB import Database as DB
 import helper
 
 # API key setup
-GOOGLE_API_KEY = "AIzaSyCyONIe9z8p2re0GnOZI3GdBpXl_I9GAXo"
-UPBIT_API_KEY = "UPBIT_API_KEY"
+load_dotenv("env/.env")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+UPBIT_API_KEY = os.getenv("UPBIT_API_KEY")
 
 def prepareNews():
     # get list of news from "coinness.com"
@@ -37,7 +40,7 @@ def prepareNews():
 def prepareSystemPrompt():
     instructions = helper.readFile("./instructions/instructions.md")
     context = helper.readFile("./instructions/context_240405.md")
-    ex_outputs = helper.readJSON("./instructions/examples.json")
+    # ex_outputs = helper.readJSON("./instructions/examples.json")
     examples = [
         {
             "input1": '{"current_time": "2024-04-02 19:50:01", "orderbook": {...}, "btc_balance": 0.1, "krw_balance": 8000000, "btc_avg_price": 80000000}',
@@ -60,21 +63,15 @@ def prepareSystemPrompt():
 
 def prepareData():
     real = helper.getRealtimeData()
-
     historical, btc_price = helper.getHistoricalData()
-
     realtime_data = json.dumps(real)
-
     historical_data = json.dumps(historical)
-
 
     # save current btc price for test
     AssetforTest.setBTCPrice(btc_price)
 
-
     # insert asset and price information into DB
     DB.insertIntoAsset(real, btc_price)
-
 
     # update the last recommendation's result based on current asset
     DB.updateRecommendationResult()
@@ -84,7 +81,9 @@ def prepareData():
 def createOutputParser():
     # desired output format
     class Recommendation(BaseModel):
-        decision: str = Field(description="Your decision whether to buy, sell or hold.")
+        """The most complete AI recommendation for trading BTC in the current situation."""
+        
+        decision: str = Field(description="Your decision whether to buy, sell or hold BTC.")
         ratio: int = Field(description="The percentage of assets you decide to buy or sell. It should be an integer between 0 and 100. If the decision is hold, ratio should be 100")
         reason: str = Field(description='''Detailed logical reason for your recommendation. 
         It should be created in consideration of all provided data, including Context, Latest Bitcoin News, Historical Market Analysis Data, Orderbook, Asset Information, etc.''')
@@ -137,7 +136,7 @@ def getAIAdvice():
 
     # initialize llm object
     try:
-        llm = ChatGoogleGenerativeAI(model='gemini-pro', convert_system_message_to_human=True, google_api_key=GOOGLE_API_KEY)
+        llm = ChatGoogleGenerativeAI(model='gemini-1.5-pro', convert_system_message_to_human=True, google_api_key=GOOGLE_API_KEY)
     except Exception as e:
         print(f"Error in starting a chatting with the LLM model: {e}")
 
