@@ -1,11 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import uvicorn
 import sqlite3
 from fastapi.middleware.cors import CORSMiddleware
+import subprocess
 
 app = FastAPI()
-ACTIVE = False # just for test
+process = None
 
 # CORS 설정 (필요에 따라 도메인을 제한할 수 있음)
 app.add_middleware(
@@ -16,8 +17,8 @@ app.add_middleware(
 )
 
 
-def toStatus(boolean):
-    if boolean:
+def toStatus(p):
+    if p is not None:
         return "Active"
     else:
         return "Deactive"
@@ -30,36 +31,43 @@ def root():
 
 @app.get("/status")
 def status():
-    global ACTIVE
+    global process
 
-    return {'status': toStatus(ACTIVE)}
+    return {'status': toStatus(process)}
 
 
 class StartItem(BaseModel):
     strategy: str = ""
 
+
 @app.post("/start")
 def start(item: StartItem):
-    global ACTIVE
+    global process
 
     item_dict = item.model_dump()
-    # TODO
-    # start the program with item_dict.strategy
     print(item_dict)
-    ACTIVE = True
-
-    return {'status': toStatus(ACTIVE)}
+    # TODO add strategy into DB and apply it to autotrading
+    
+    # start the program with item_dict.strategy
+    if process is not None and process.poll() is None:
+        raise HTTPException(status_code=400, detail="The program is already running.")
+    process = subprocess.Popen(["python", "../autotrade/autotrade.py"])
+    
+    return {'status': toStatus(process), "message": "Program started successfully."}
 
 
 @app.post("/stop")
 def stop():
-    global ACTIVE
+    global process
     
-    # TODO
     # stop the program
-    ACTIVE = False
+    if process is None or process.poll() is not None:
+        raise HTTPException(status_code=400, detail="No running program.")
+    process.terminate()
+    process.wait()
+    process = None
 
-    return {'status': toStatus(ACTIVE)}
+    return {'status': toStatus(process)}
 
 
 @app.get("/recommendations")
