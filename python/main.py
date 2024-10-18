@@ -30,7 +30,7 @@ def isActive():
 
 
 def run_autotrade():
-    subprocess.Popen(['python', 'autotrade.py'])
+    subprocess.Popen(["python", "autotrade.py"])
     # subprocess.Popen(["./.venv/Scripts/python.exe", "./autotrade.py"])
 
     return
@@ -43,7 +43,7 @@ def root():
 
 @app.get("/status")
 def status():
-    return {'status': isActive()}
+    return {"status": isActive()}
 
 
 class StartItem(BaseModel):
@@ -53,21 +53,21 @@ class StartItem(BaseModel):
 @app.post("/start")
 def start(item: StartItem):
     global scheduler
-    
+
     # item_dict = item.model_dump()
     # print(item_dict)
     # TODO add strategy into DB and apply it to autotrading
-    
+
     if scheduler.running:
         raise HTTPException(status_code=400, detail="The program is already running.")
     else:
         # start the program
         run_autotrade()
         # schedule to execute program every hour
-        scheduler.add_job(run_autotrade, 'interval', hours=1)
+        scheduler.add_job(run_autotrade, "interval", hours=1, misfire_grace_time=None)
         scheduler.start()
-    
-    return {'status': isActive(), "message": "Program started successfully."}
+
+    return {"status": isActive(), "message": "Program started successfully."}
 
 
 @app.post("/stop")
@@ -81,17 +81,17 @@ def stop():
         scheduler.remove_all_jobs()
         scheduler.shutdown(wait=False)
 
-    return {'status': isActive(), "message": "Program stopped successfully."}
+    return {"status": isActive(), "message": "Program stopped successfully."}
 
 
 @app.get("/recommendations")
 def recommendations():
-    conn = sqlite3.connect('./database/trading_history.db')
+    conn = sqlite3.connect("./database/trading_history.db")
     cursor = conn.cursor()
     try:
         cursor.execute("SELECT * FROM recommendation ORDER BY id")
         r_list = cursor.fetchall()
-        
+
     except:
         r_list = []
     finally:
@@ -109,18 +109,20 @@ def recommendations():
         }
         recommendations.append(r_json)
 
-    return {'recommendations': recommendations}
+    return {"recommendations": recommendations}
 
 
 @app.get("/profit")
 def profit():
-    conn = sqlite3.connect('./database/trading_history.db')
+    conn = sqlite3.connect("./database/trading_history.db")
     cursor = conn.cursor()
     try:
-        cursor.execute('''
+        cursor.execute(
+            """
             (SELECT total_asset FROM asset ORDER BY id LIMIT 1)
             UNION ALL
-            (SELECT total_asset FROM asset ORDER BY id DESC LIMIT 1)''')
+            (SELECT total_asset FROM asset ORDER BY id DESC LIMIT 1)"""
+        )
         result = cursor.fetchall()
         initial_asset, current_asset = result[0][0], result[1][0]
     except:
@@ -134,17 +136,19 @@ def profit():
 
     profit = round((current_asset - initial_asset) / initial_asset * 100, 2)
 
-    return {'profit': profit}
+    return {"profit": profit}
 
 
 @app.get("/chartData")
 def chartData():
-    conn = sqlite3.connect('./database/trading_history.db')
+    conn = sqlite3.connect("./database/trading_history.db")
     cursor = conn.cursor()
     try:
-        cursor.execute('''SELECT asset.id, asset.timestamp, decision, ratio, btc_price 
+        cursor.execute(
+            """SELECT asset.id, asset.timestamp, decision, ratio, btc_price 
                     FROM recommendation INNER JOIN asset 
-                    ON recommendation.timestamp = asset.timestamp''')
+                    ON recommendation.timestamp = asset.timestamp"""
+        )
         cd_list = cursor.fetchall()
     except:
         cd_list = []
@@ -161,8 +165,8 @@ def chartData():
             "btc_price": item[4],
         }
         chart_data.append(cd_json)
-    
-    return {'data': chart_data}
+
+    return {"data": chart_data}
 
 
 if __name__ == "__main__":
