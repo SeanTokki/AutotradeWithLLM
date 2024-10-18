@@ -8,7 +8,8 @@ import subprocess
 app = FastAPI()
 process = None
 
-# CORS 설정 (필요에 따라 도메인을 제한할 수 있음)
+
+# CORS setting
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -51,8 +52,8 @@ def start(item: StartItem):
     # start the program with item_dict.strategy
     if process is not None and process.poll() is None:
         raise HTTPException(status_code=400, detail="The program is already running.")
-    # process = subprocess.Popen(["python", "./autotrade.py"])
-    process = subprocess.Popen(["./.venv/Scripts/python.exe", "./autotrade.py"])
+    process = subprocess.Popen(["python", "./autotrade.py"])
+    # process = subprocess.Popen(["./.venv/Scripts/python.exe", "./autotrade.py"])
     
     return {'status': toStatus(process), "message": "Program started successfully."}
 
@@ -73,7 +74,7 @@ def stop():
 
 @app.get("/recommendations")
 def recommendations():
-    conn = sqlite3.connect('./database/trading_history_old.db')
+    conn = sqlite3.connect('./database/trading_history.db')
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM recommendation ORDER BY id LIMIT 30") # limit for test
     r_list = cursor.fetchall()
@@ -96,7 +97,7 @@ def recommendations():
 
 @app.get("/profit")
 def profit():
-    conn = sqlite3.connect('./database/trading_history_old.db')
+    conn = sqlite3.connect('./database/trading_history.db')
     cursor = conn.cursor()
     cursor.execute("SELECT total_asset FROM asset ORDER BY id LIMIT 1")
     initial_asset = cursor.fetchone()[0]
@@ -111,7 +112,7 @@ def profit():
 
 @app.get("/chartData")
 def chartData():
-    conn = sqlite3.connect('./database/trading_history_old.db')
+    conn = sqlite3.connect('./database/trading_history.db')
     cursor = conn.cursor()
     cursor.execute('''SELECT asset.id, asset.timestamp, decision, ratio, btc_price 
                    FROM recommendation INNER JOIN asset 
@@ -134,4 +135,4 @@ def chartData():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8080)

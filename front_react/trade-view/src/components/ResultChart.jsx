@@ -32,7 +32,7 @@ function ResultChart() {
                 <div className="custom-tooltip">
                     <p className="main">{`BTC Price : ${data.btc_price.toLocaleString("ko-KR")}￦`}</p>
                     <p className="sub">{`Timestamp: ${data.timestamp}`}</p>
-                    <p className="sub">{`AI Decision : ${data.decision.toUpperCase()} ${data.ratio * 100}%`}</p>
+                    <p className="sub">{`AI Decision : ${data.decision.toUpperCase()} ${data.ratio}%`}</p>
                 </div>
             );
         }
