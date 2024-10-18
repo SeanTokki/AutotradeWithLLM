@@ -1,8 +1,10 @@
 from playwright.sync_api import sync_playwright
 from playwright.async_api import async_playwright
+
 # from bs4 import BeautifulSoup
 import asyncio
 import time
+
 
 def fetchWithPlaywright(urls):
     contents = []
@@ -12,14 +14,14 @@ def fetchWithPlaywright(urls):
                 print(f"Start fetching | url: {url}")
                 browser = pw.chromium.launch(headless=True)
                 context = browser.new_context(
-                    user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
                 )
                 page = context.new_page()
-                
+
                 page.goto(url)
                 # Waiting until page loading is done. But don't know why this is the solution.
                 print(f"Waiting for page loading... | url: {url}")
-                time.sleep(6) 
+                time.sleep(6)
 
                 contents.append(page.content())
                 print(f"Fetch clear | url: {url}")
@@ -28,8 +30,9 @@ def fetchWithPlaywright(urls):
                 contents.append("")
             finally:
                 browser.close()
-    
+
     return contents
+
 
 async def _asyncFetch(urls):
     # Inner function to fetch only one url
@@ -39,10 +42,10 @@ async def _asyncFetch(urls):
                 print(f"Start fetching | url: {url}")
                 browser = await pw.chromium.launch(headless=True)
                 context = await browser.new_context(
-                    user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
                 )
                 page = await context.new_page()
-                
+
                 await page.goto(url)
                 # Waiting until page loading is done. But don't know why this is the solution.
                 print(f"Waiting for page loading... | url: {url}")
@@ -55,17 +58,18 @@ async def _asyncFetch(urls):
                 content = ""
             finally:
                 await browser.close()
-        
+
         return content
-    
+
     # Start fetching all urls simultaneously
     contents = await asyncio.gather(*[asyncFetchOne(url) for url in urls])
-    
+
     return contents
+
 
 def asyncFetchWithPlaywright(urls):
     contents = asyncio.run(_asyncFetch(urls))
-    
+
     # Due to the server specifications, at most 2 crawler will be active at a time.
     # bundled_urls = [[x, y] for x, y in zip(urls[0::2], urls[1::2])]
     # contents = []

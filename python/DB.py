@@ -1,9 +1,10 @@
 import sqlite3
 
-class Database():
+
+class Database:
     @staticmethod
     def initConnection():
-        conn = sqlite3.connect('./database/trading_history.db')
+        conn = sqlite3.connect("./database/trading_history.db")
         cursor = conn.cursor()
 
         return conn, cursor
@@ -12,24 +13,25 @@ class Database():
     def dropAllTable(cls):
         # open connection
         conn, cursor = cls.initConnection()
-        
+
         # drop asset, recommendation tables
         cursor.execute("DROP TABLE IF EXISTS asset")
         cursor.execute("DROP TABLE IF EXISTS recommendation")
         conn.commit()
-        
+
         # close connection
         conn.close()
 
         return
-    
+
     @classmethod
     def createTables(cls):
         # open connection
         conn, cursor = cls.initConnection()
-        
+
         # create asset table
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS asset (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp TEXT,
@@ -38,10 +40,11 @@ class Database():
             btc_price REAL,
             krw_balance REAL,
             total_asset REAL
-            )'''
+            )"""
         )
         # create recommendation table
-        cursor.execute('''
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS recommendation (
             id INTEGER PRIMARY KEY,
             timestamp TEXT,
@@ -51,7 +54,7 @@ class Database():
             result TEXT,
             FOREIGN KEY(id) REFERENCES asset(id)
             FOREIGN KEY(timestamp) REFERENCES asset(timestamp)
-            )'''
+            )"""
         )
         conn.commit()
 
@@ -64,11 +67,14 @@ class Database():
     def isExist(cls, table_name):
         # open connection
         conn, cursor = cls.initConnection()
-        
+
         # count a table whose name is $table_name
-        cursor.execute('''
+        cursor.execute(
+            """
             SELECT COUNT(*) FROM sqlite_master 
-            WHERE type='table' AND name=?''', (table_name,))
+            WHERE type='table' AND name=?""",
+            (table_name,),
+        )
         result = cursor.fetchone()[0]
 
         # close connection
@@ -82,26 +88,30 @@ class Database():
         conn, cursor = cls.initConnection()
 
         # load last recommendatin info
-        cursor.execute('''
+        cursor.execute(
+            """
             SELECT btc_balance, krw_balance, btc_avg_price, btc_price 
-            FROM asset ORDER BY id DESC LIMIT 1''')
+            FROM asset ORDER BY id DESC LIMIT 1"""
+        )
         asset = cursor.fetchone()
-        
+
         # close connection
         conn.close()
 
         return asset
-    
+
     @classmethod
     def loadLastRecommendation(cls):
         # open connection
         conn, cursor = cls.initConnection()
 
         # load last recommendation info
-        cursor.execute('''
-            SELECT decision, ratio FROM recommendation ORDER BY id DESC LIMIT 1''')
+        cursor.execute(
+            """
+            SELECT decision, ratio FROM recommendation ORDER BY id DESC LIMIT 1"""
+        )
         recommendation = cursor.fetchone()
-        
+
         # close connection
         conn.close()
 
@@ -111,20 +121,29 @@ class Database():
     def insertIntoAsset(cls, asset, price):
         # open connection
         conn, cursor = cls.initConnection()
-        
-        timestamp = asset.get('current_time')
-        btc_balance = asset.get('btc_balance')
-        btc_avg_price = asset.get('btc_avg_price')
+
+        timestamp = asset.get("current_time")
+        btc_balance = asset.get("btc_balance")
+        btc_avg_price = asset.get("btc_avg_price")
         btc_price = price
-        krw_balance = asset.get('krw_balance')
+        krw_balance = asset.get("krw_balance")
         total_asset = round(btc_balance * btc_price + krw_balance)
 
-        values = (timestamp, btc_balance, btc_avg_price, btc_price, krw_balance, total_asset)
-        
+        values = (
+            timestamp,
+            btc_balance,
+            btc_avg_price,
+            btc_price,
+            krw_balance,
+            total_asset,
+        )
+
         # insert asset information
-        cursor.execute('''
+        cursor.execute(
+            """
             INSERT INTO asset (timestamp, btc_balance, btc_avg_price, btc_price, krw_balance, total_asset)
-            VALUES (?, ?, ?, ?, ?, ?)''', values
+            VALUES (?, ?, ?, ?, ?, ?)""",
+            values,
         )
         conn.commit()
 
@@ -137,17 +156,25 @@ class Database():
     def insertIntoRecommendation(cls, response):
         # open connection
         conn, cursor = cls.initConnection()
-        
+
         # get latest asset's id and timestamp for synchronization
         cursor.execute("SELECT id, timestamp FROM asset ORDER BY id DESC LIMIT 3")
         id, timestamp = cursor.fetchone()
 
-        values = (id, timestamp, response.get('decision'), response.get('ratio'), response.get('reason'))
-        
+        values = (
+            id,
+            timestamp,
+            response.get("decision"),
+            response.get("ratio"),
+            response.get("reason"),
+        )
+
         # insert AI recommendation information
-        cursor.execute('''
+        cursor.execute(
+            """
             INSERT INTO recommendation (id, timestamp, decision, ratio, reason)
-            VALUES (?, ?, ?, ?, ?)''', values
+            VALUES (?, ?, ?, ?, ?)""",
+            values,
         )
         conn.commit()
 
@@ -160,11 +187,12 @@ class Database():
     def updateRecommendationResult(cls):
         # open connection
         conn, cursor = cls.initConnection()
-        
+
         # check if there is at least two asset information
         cursor.execute("SELECT COUNT(id) FROM asset")
         count = cursor.fetchone()
-        if count[0] <= 1: return
+        if count[0] <= 1:
+            return
 
         # fetch two latest asset information
         cursor.execute("SELECT id, total_asset FROM asset ORDER BY id DESC LIMIT 3")
@@ -172,14 +200,18 @@ class Database():
         last_id, last_asset = cursor.fetchone()
 
         # if total asset increased, 'SUCCESS', decreased, 'FAIL'
-        if current_asset > last_asset: result = 'SUCCESS'
-        else: result = 'FAIL'
+        if current_asset > last_asset:
+            result = "SUCCESS"
+        else:
+            result = "FAIL"
 
         # insert result to second latest recommendation
-        cursor.execute('''
+        cursor.execute(
+            """
             UPDATE recommendation
             SET result = ?
-            WHERE id = ?''', (result, last_id)
+            WHERE id = ?""",
+            (result, last_id),
         )
         conn.commit()
 
@@ -192,7 +224,7 @@ class Database():
     def getLastRecommendation(cls):
         # open connection
         conn, cursor = cls.initConnection()
-        
+
         # fetch last recommendation
         cursor.execute("SELECT * FROM recommendation ORDER BY id DESC LIMIT 3")
         last_recommendation = cursor.fetchone()
@@ -205,4 +237,3 @@ class Database():
             raise Exception("There is no recommendation in the table")
 
         return last_recommendation
-
