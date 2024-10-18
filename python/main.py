@@ -4,9 +4,11 @@ import uvicorn
 import sqlite3
 from fastapi.middleware.cors import CORSMiddleware
 import subprocess
+from apscheduler.schedulers.background import BackgroundScheduler
+
 
 app = FastAPI()
-process = None
+scheduler = BackgroundScheduler(daemon=True)
 
 
 # CORS setting
@@ -18,11 +20,20 @@ app.add_middleware(
 )
 
 
-def toStatus(p):
-    if p is not None:
+def isActive():
+    global scheduler
+
+    if scheduler.running:
         return "Active"
     else:
         return "Deactive"
+
+
+def run_autotrade():
+    subprocess.Popen(['python', 'autotrade.py'])
+    # subprocess.Popen(["./.venv/Scripts/python.exe", "./autotrade.py"])
+
+    return
 
 
 @app.get("/")
@@ -32,9 +43,7 @@ def root():
 
 @app.get("/status")
 def status():
-    global process
-
-    return {'status': toStatus(process)}
+    return {'status': isActive()}
 
 
 class StartItem(BaseModel):
@@ -43,42 +52,50 @@ class StartItem(BaseModel):
 
 @app.post("/start")
 def start(item: StartItem):
-    global process
-
-    item_dict = item.model_dump()
-    print(item_dict)
+    global scheduler
+    
+    # item_dict = item.model_dump()
+    # print(item_dict)
     # TODO add strategy into DB and apply it to autotrading
     
-    # start the program with item_dict.strategy
-    if process is not None and process.poll() is None:
+    if scheduler.running:
         raise HTTPException(status_code=400, detail="The program is already running.")
-    process = subprocess.Popen(["python", "./autotrade.py"])
-    # process = subprocess.Popen(["./.venv/Scripts/python.exe", "./autotrade.py"])
+    else:
+        # start the program
+        run_autotrade()
+        # schedule to execute program every hour
+        scheduler.add_job(run_autotrade, 'interval', hours=1)
+        scheduler.start()
     
-    return {'status': toStatus(process), "message": "Program started successfully."}
+    return {'status': isActive(), "message": "Program started successfully."}
 
 
 @app.post("/stop")
 def stop():
-    global process
-    
-    # stop the program
-    if process is None or process.poll() is not None:
-        raise HTTPException(status_code=400, detail="No running program.")
-    process.terminate()
-    process.wait()
-    process = None
+    global scheduler
 
-    return {'status': toStatus(process)}
+    # stop the program
+    if not scheduler.running:
+        raise HTTPException(status_code=400, detail="No running program.")
+    else:
+        scheduler.remove_all_jobs()
+        scheduler.shutdown(wait=False)
+
+    return {'status': isActive(), "message": "Program stopped successfully."}
 
 
 @app.get("/recommendations")
 def recommendations():
     conn = sqlite3.connect('./database/trading_history.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM recommendation ORDER BY id LIMIT 30") # limit for test
-    r_list = cursor.fetchall()
-    conn.close()
+    try:
+        cursor.execute("SELECT * FROM recommendation ORDER BY id")
+        r_list = cursor.fetchall()
+        
+    except:
+        r_list = []
+    finally:
+        conn.close()
 
     recommendations = []
     for item in r_list:
@@ -99,11 +116,21 @@ def recommendations():
 def profit():
     conn = sqlite3.connect('./database/trading_history.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT total_asset FROM asset ORDER BY id LIMIT 1")
-    initial_asset = cursor.fetchone()[0]
-    cursor.execute("SELECT total_asset FROM asset ORDER BY id DESC LIMIT 1")
-    current_asset = cursor.fetchone()[0]
-    conn.close()
+    try:
+        cursor.execute('''
+            (SELECT total_asset FROM asset ORDER BY id LIMIT 1)
+            UNION ALL
+            (SELECT total_asset FROM asset ORDER BY id DESC LIMIT 1)''')
+        result = cursor.fetchall()
+        initial_asset, current_asset = result[0][0], result[1][0]
+    except:
+        initial_asset, current_asset = 1, 1
+    finally:
+        conn.close()
+    # cursor.execute("SELECT total_asset FROM asset ORDER BY id LIMIT 1")
+    # initial_asset = cursor.fetchone()[0]
+    # cursor.execute("SELECT total_asset FROM asset ORDER BY id DESC LIMIT 1")
+    # current_asset = cursor.fetchone()[0]
 
     profit = round((current_asset - initial_asset) / initial_asset * 100, 2)
 
@@ -114,11 +141,15 @@ def profit():
 def chartData():
     conn = sqlite3.connect('./database/trading_history.db')
     cursor = conn.cursor()
-    cursor.execute('''SELECT asset.id, asset.timestamp, decision, ratio, btc_price 
-                   FROM recommendation INNER JOIN asset 
-                   ON recommendation.timestamp = asset.timestamp LIMIT 30''')
-    cd_list = cursor.fetchall()
-    conn.close()
+    try:
+        cursor.execute('''SELECT asset.id, asset.timestamp, decision, ratio, btc_price 
+                    FROM recommendation INNER JOIN asset 
+                    ON recommendation.timestamp = asset.timestamp''')
+        cd_list = cursor.fetchall()
+    except:
+        cd_list = []
+    finally:
+        conn.close()
 
     chart_data = []
     for item in cd_list:

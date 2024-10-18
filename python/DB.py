@@ -7,7 +7,6 @@ class Database():
         cursor = conn.cursor()
 
         return conn, cursor
-    
 
     @classmethod
     def dropAllTable(cls):
@@ -60,6 +59,53 @@ class Database():
         conn.close()
 
         return
+
+    @classmethod
+    def isExist(cls, table_name):
+        # open connection
+        conn, cursor = cls.initConnection()
+        
+        # count a table whose name is $table_name
+        cursor.execute('''
+            SELECT COUNT(*) FROM sqlite_master 
+            WHERE type='table' AND name=?''', (table_name,))
+        result = cursor.fetchone()[0]
+
+        # close connection
+        conn.close()
+
+        return bool(result)
+
+    @classmethod
+    def loadLastAsset(cls):
+        # open connection
+        conn, cursor = cls.initConnection()
+
+        # load last recommendatin info
+        cursor.execute('''
+            SELECT btc_balance, krw_balance, btc_avg_price, btc_price 
+            FROM asset ORDER BY id DESC LIMIT 1''')
+        asset = cursor.fetchone()
+        
+        # close connection
+        conn.close()
+
+        return asset
+    
+    @classmethod
+    def loadLastRecommendation(cls):
+        # open connection
+        conn, cursor = cls.initConnection()
+
+        # load last recommendation info
+        cursor.execute('''
+            SELECT decision, ratio FROM recommendation ORDER BY id DESC LIMIT 1''')
+        recommendation = cursor.fetchone()
+        
+        # close connection
+        conn.close()
+
+        return recommendation
 
     @classmethod
     def insertIntoAsset(cls, asset, price):

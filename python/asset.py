@@ -1,3 +1,5 @@
+from DB import Database as DB
+
 class AssetforTest():
     # static variables
     btc_balance = 0
@@ -8,10 +10,34 @@ class AssetforTest():
 
     @classmethod
     def initializeAsset(cls):
-        cls.btc_balance = 0
-        cls.krw_balance = 10000000
-        cls.btc_avg_price = 0
-        cls.current_btc_price = 0
+        if DB.isExist("asset") and DB.isExist("recommendation"):
+            # load asset info
+            print("Load previous asset information.")
+            btc_balance, krw_balance, btc_avg_price, current_btc_price = DB.loadLastAsset()
+            decision, ratio = DB.loadLastRecommendation()
+
+            cls.btc_balance = btc_balance
+            cls.krw_balance = krw_balance
+            cls.btc_avg_price = btc_avg_price
+            cls.current_btc_price = current_btc_price
+
+            if decision == "buy":
+                cls.executeBuy(ratio)
+            elif decision == "sell":
+                cls.executeSell(ratio)
+
+        else:
+            # initialize asset info
+            print("There is no previous information. Initializing...")
+            cls.btc_balance = 0
+            cls.krw_balance = 10000000
+            cls.btc_avg_price = 0
+            cls.current_btc_price = 0
+
+            # initialize DB
+            DB.dropAllTable()
+            DB.createTables()
+        
         cls.trade_fee = 0.0005
 
         return

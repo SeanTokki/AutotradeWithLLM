@@ -1,8 +1,8 @@
 # import os
 from dotenv import load_dotenv
 import json
-import time
-import schedule
+# import time
+# import schedule
 from langchain_google_vertexai import ChatVertexAI
 from langchain.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
 from langchain_core.runnables import RunnableLambda
@@ -199,19 +199,22 @@ def autotrade():
     return
 
 def main():
-    # initialize asset
+    # initialize asset (or load if there exist previous asset info)
     AssetforTest.initializeAsset()
 
     # initialize DB
-    DB.dropAllTable()
-    DB.createTables()
+    # DB.dropAllTable()
+    # DB.createTables()
+
+    # operate trading only once
+    autotrade()
 
     # operate trading every hours
-    autotrade()
-    schedule.every().hours.do(autotrade)
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    # schedule.every().hours.do(autotrade)
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(1)
+    return
 
 if __name__ == '__main__':
     main()
