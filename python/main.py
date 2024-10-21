@@ -91,9 +91,9 @@ def recommendations():
     try:
         cursor.execute("SELECT * FROM recommendation ORDER BY id")
         r_list = cursor.fetchall()
-
-    except:
-        r_list = []
+    except Exception as e:
+        print(f"Exception while loading recommendations: {e}")
+        r_list = [[0, "0000-00-00 00:00:00", "TRASH", 0, "TRASH", "TRASH"]]
     finally:
         conn.close()
 
@@ -112,20 +112,51 @@ def recommendations():
     return {"recommendations": recommendations}
 
 
+@app.get("/asset")
+def asset():
+    conn = sqlite3.connect("./database/trading_history_old.db")
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT * FROM asset ORDER BY id")
+        a_list = cursor.fetchall()
+    except Exception as e:
+        print(f"Exception while loading asset: {e}")
+        a_list = [[0, "0000-00-00 00:00:00", 0, 0, 0, 0, 0]]
+    finally:
+        conn.close()
+
+    asset = []
+    for item in a_list:
+        a_json = {
+            "id": item[0],
+            "timestamp": item[1],
+            "btc_balance": item[2],
+            "btc_avg_price": item[3],
+            "btc_price": item[4],
+            "krw_balance": item[5],
+            "total_asset": item[6],
+        }
+        asset.append(a_json)
+
+    return {"asset": asset}
+
+
 @app.get("/profit")
 def profit():
-    conn = sqlite3.connect("./database/trading_history.db")
+    conn = sqlite3.connect("./database/trading_history_old.db")
     cursor = conn.cursor()
     try:
         cursor.execute(
             """
-            (SELECT total_asset FROM asset ORDER BY id LIMIT 1)
-            UNION ALL
-            (SELECT total_asset FROM asset ORDER BY id DESC LIMIT 1)"""
+            SELECT total_asset FROM asset WHERE id = (SELECT MIN(id) FROM asset)
+            UNION ALL 
+            SELECT total_asset FROM asset WHERE id = (SELECT MAX(id) FROM asset)
+            """
         )
         result = cursor.fetchall()
         initial_asset, current_asset = result[0][0], result[1][0]
-    except:
+    except Exception as e:
+        print(f"Exception while loading profit: {e}")
         initial_asset, current_asset = 1, 1
     finally:
         conn.close()
@@ -141,16 +172,19 @@ def profit():
 
 @app.get("/chartData")
 def chartData():
-    conn = sqlite3.connect("./database/trading_history.db")
+    conn = sqlite3.connect("./database/trading_history_old.db")
     cursor = conn.cursor()
     try:
         cursor.execute(
-            """SELECT asset.id, asset.timestamp, decision, ratio, btc_price 
-                    FROM recommendation INNER JOIN asset 
-                    ON recommendation.timestamp = asset.timestamp"""
+            """
+            SELECT asset.id, asset.timestamp, decision, ratio, btc_price 
+            FROM recommendation INNER JOIN asset 
+            ON recommendation.timestamp = asset.timestamp
+            """
         )
         cd_list = cursor.fetchall()
-    except:
+    except Exception as e:
+        print(f"Exception while loading chart data: {e}")
         cd_list = []
     finally:
         conn.close()
