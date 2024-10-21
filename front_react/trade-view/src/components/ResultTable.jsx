@@ -2,46 +2,42 @@ import React, { useState, useEffect } from "react";
 import api from "../services/api.jsx";
 import "./ResultTable.css";
 
-function ResultTable() {
-    const [records, setRecords] = useState([
-        {
-            decision: "none",
-            id: 0,
-            ratio: 0,
-            reason: "no reason",
-            result: "FAIL",
-            timestamp: "2024-01-01 00:00:00",
-        },
-    ]);
+function ResultTable({ tableName, labels }) {
+    const [records, setRecords] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        api.get("/recommendations")
-            .then((response) => setRecords(response.data.recommendations))
-            .catch((error) => console.error(error));
+        api.get(`/${tableName}`)
+            .then((response) => {
+                setRecords(response.data[tableName]);
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.error(error);
+                setError("Error fetching data");
+            });
     }, []);
+
+    if (error) return <p>{error}</p>;
+    if (loading) return <p>{"Loading..."}</p>;
 
     return (
         <div className="table-container">
             <table className="table">
                 <thead>
                     <tr>
-                        <th>id</th>
-                        <th>timestamp</th>
-                        <th>decision</th>
-                        <th>ratio</th>
-                        <th>reason</th>
-                        <th>result</th>
+                        {labels.map((label, index) => (
+                            <th key={index}>{label}</th>
+                        ))}
                     </tr>
                 </thead>
                 <tbody>
-                    {records.map((record, index) => (
-                        <tr key={index}>
-                            <td>{record.id}</td>
-                            <td>{record.timestamp}</td>
-                            <td>{record.decision}</td>
-                            <td>{record.ratio}</td>
-                            <td>{record.reason}</td>
-                            <td>{record.result}</td>
+                    {records.map((row, rowIndex) => (
+                        <tr key={rowIndex}>
+                            {labels.map((label, colIndex) => (
+                                <td key={colIndex}>{row[label]}</td>
+                            ))}
                         </tr>
                     ))}
                 </tbody>

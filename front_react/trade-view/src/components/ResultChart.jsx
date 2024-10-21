@@ -5,12 +5,20 @@ import "./ResultChart.css";
 
 function ResultChart() {
     const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // Initial api request for chart data
     useEffect(() => {
         api.get("/chartData")
-            .then((response) => setData(response.data.data))
-            .catch((error) => console.error(error));
+            .then((response) => {
+                setData(response.data.data);
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.error(error);
+                setError("Error fetching data");
+            });
     }, []);
 
     // Color the dots according to the AI decision
@@ -50,6 +58,9 @@ function ResultChart() {
     const formatYAxis = (yTick) => {
         return `${yTick.toLocaleString("ko-KR")}`;
     };
+
+    if (error) return <p>{error}</p>;
+    if (loading) return <p>{"Loading..."}</p>;
 
     return (
         <ResponsiveContainer width="90%" height={300}>
