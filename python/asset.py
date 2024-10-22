@@ -25,9 +25,9 @@ class AssetforTest:
             cls.current_btc_price = current_btc_price
 
             if decision == "buy":
-                cls.executeBuy(ratio)
+                cls.executeBuy(ratio / 100, False)
             elif decision == "sell":
-                cls.executeSell(ratio)
+                cls.executeSell(ratio / 100, False)
 
         else:
             # initialize asset info
@@ -79,7 +79,7 @@ class AssetforTest:
         return
 
     @classmethod
-    def executeBuy(cls, ratio):
+    def executeBuy(cls, ratio, print_result = True):
         if ratio >= (1 - cls.trade_fee):
             buy_amount = cls.krw_balance * (1 - cls.trade_fee)
             cls.krw_balance = 0
@@ -92,24 +92,27 @@ class AssetforTest:
             (buy_amount + past_btc_balance * cls.btc_avg_price) / cls.btc_balance
         )
 
-        cls.printResult("bought")
+        if print_result: 
+            cls.printResult("bought")
 
         return
 
     @classmethod
-    def executeSell(cls, ratio):
+    def executeSell(cls, ratio, print_result = True):
         sell_amount = cls.btc_balance * ratio
         cls.btc_balance -= sell_amount
         cls.krw_balance += (sell_amount * cls.current_btc_price) * (1 - cls.trade_fee)
         if cls.btc_balance == 0:
             cls.btc_avg_price = 0
 
-        cls.printResult("sold")
+        if print_result:
+            cls.printResult("sold")
 
         return
 
     @classmethod
-    def executeHold(cls):
-        cls.printResult("hold")
+    def executeHold(cls, print_result = True):
+        if print_result:
+            cls.printResult("hold")
 
         return
