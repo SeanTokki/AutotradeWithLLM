@@ -10,6 +10,6 @@ RUN playwright install-deps
 COPY . .
 
 EXPOSE 8080
-ENV TZ Asia/Seoul
+ENV TZ=Asia/Seoul
 
 CMD ["python", "main.py"]

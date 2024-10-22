@@ -146,7 +146,7 @@ def getAIAdvice():
     # initialize llm object
     try:
         # llm = ChatGoogleGenerativeAI(model='gemini-1.5-pro', google_api_key=GOOGLE_API_KEY)
-        llm = ChatVertexAI(model="gemini-1.5-flash")
+        llm = ChatVertexAI(model="gemini-1.5-pro")
     except Exception as e:
         print(f"Error in starting a chatting with the LLM model: {e}")
 
@@ -200,7 +200,7 @@ def autotrade():
         return
 
     # execute the decision
-    ratio = decision.get("ratio")
+    ratio = decision.get("ratio") / 100
     print(f"AI response:\n{decision}\n")
     if decision.get("decision") == "buy":
         AssetforTest.executeBuy(ratio)  # helper.executeBuy(ratio)

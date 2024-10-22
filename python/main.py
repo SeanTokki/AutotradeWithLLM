@@ -114,7 +114,7 @@ def recommendations():
 
 @app.get("/asset")
 def asset():
-    conn = sqlite3.connect("./database/trading_history_old.db")
+    conn = sqlite3.connect("./database/trading_history.db")
     cursor = conn.cursor()
     try:
         cursor.execute("SELECT * FROM asset ORDER BY id")
@@ -143,7 +143,7 @@ def asset():
 
 @app.get("/profit")
 def profit():
-    conn = sqlite3.connect("./database/trading_history_old.db")
+    conn = sqlite3.connect("./database/trading_history.db")
     cursor = conn.cursor()
     try:
         cursor.execute(
@@ -160,10 +160,6 @@ def profit():
         initial_asset, current_asset = 1, 1
     finally:
         conn.close()
-    # cursor.execute("SELECT total_asset FROM asset ORDER BY id LIMIT 1")
-    # initial_asset = cursor.fetchone()[0]
-    # cursor.execute("SELECT total_asset FROM asset ORDER BY id DESC LIMIT 1")
-    # current_asset = cursor.fetchone()[0]
 
     profit = round((current_asset - initial_asset) / initial_asset * 100, 2)
 
@@ -172,7 +168,7 @@ def profit():
 
 @app.get("/chartData")
 def chartData():
-    conn = sqlite3.connect("./database/trading_history_old.db")
+    conn = sqlite3.connect("./database/trading_history.db")
     cursor = conn.cursor()
     try:
         cursor.execute(

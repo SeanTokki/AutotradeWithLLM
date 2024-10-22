@@ -11,7 +11,7 @@ def fetchWithPlaywright(urls):
     for url in urls:
         with sync_playwright() as pw:
             try:
-                print(f"Start fetching | url: {url}")
+                # print(f"Start fetching | url: {url}")
                 browser = pw.chromium.launch(headless=True)
                 context = browser.new_context(
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
@@ -20,7 +20,7 @@ def fetchWithPlaywright(urls):
 
                 page.goto(url)
                 # Waiting until page loading is done. But don't know why this is the solution.
-                print(f"Waiting for page loading... | url: {url}")
+                # print(f"Waiting for page loading... | url: {url}")
                 time.sleep(6)
 
                 contents.append(page.content())
@@ -39,7 +39,7 @@ async def _asyncFetch(urls):
     async def asyncFetchOne(url):
         async with async_playwright() as pw:
             try:
-                print(f"Start fetching | url: {url}")
+                # print(f"Start fetching | url: {url}")
                 browser = await pw.chromium.launch(headless=True)
                 context = await browser.new_context(
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
@@ -48,7 +48,7 @@ async def _asyncFetch(urls):
 
                 await page.goto(url)
                 # Waiting until page loading is done. But don't know why this is the solution.
-                print(f"Waiting for page loading... | url: {url}")
+                # print(f"Waiting for page loading... | url: {url}")
                 await asyncio.sleep(6)
 
                 content = await page.content()
