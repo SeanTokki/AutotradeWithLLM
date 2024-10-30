@@ -12,9 +12,9 @@
 
 .input-container textarea {
     width: 100%;
-    padding: 5px 0px;
-    font-size: 1em;
-    border: 1px solid #FFC17F;
+    padding: 5px 5px;
+    font-size: 1.2rem;
+    border: 2px solid #FFC17F;
     border-radius: 4px;
     resize: none;
     overflow: hidden;
