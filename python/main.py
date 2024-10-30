@@ -23,7 +23,7 @@ app.add_middleware(
 def isActive():
     global scheduler
 
-    if scheduler.running:
+    if scheduler.get_job("autotrade") :
         return "Active"
     else:
         return "Deactive"
@@ -58,14 +58,13 @@ def start(item: StartItem):
     # print(item_dict)
     # TODO add strategy into DB and apply it to autotrading
 
-    if scheduler.running:
+    if scheduler.get_job("autotrade"):
         raise HTTPException(status_code=400, detail="The program is already running.")
     else:
         # start the program
         run_autotrade()
         # schedule to execute program every hour
-        scheduler.add_job(run_autotrade, "interval", hours=1, misfire_grace_time=None)
-        scheduler.start()
+        scheduler.add_job(func=run_autotrade, trigger="interval", hours=1, misfire_grace_time=None, id="autotrade")    
 
     return {"status": isActive(), "message": "Program started successfully."}
 
@@ -75,11 +74,10 @@ def stop():
     global scheduler
 
     # stop the program
-    if not scheduler.running:
+    if not scheduler.get_job("autotrade"):
         raise HTTPException(status_code=400, detail="No running program.")
     else:
-        scheduler.remove_all_jobs()
-        scheduler.shutdown(wait=False)
+        scheduler.remove_job("autotrade")
 
     return {"status": isActive(), "message": "Program stopped successfully."}
 
@@ -200,4 +198,5 @@ def chartData():
 
 
 if __name__ == "__main__":
+    scheduler.start()
     uvicorn.run(app, host="0.0.0.0", port=8080)
