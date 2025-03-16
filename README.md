@@ -5,6 +5,6 @@
 - Back-end development using FastAPI, SQLite3, Nginx
 - Deployment using Docker, Google Cloud VM
 - Implement LLM architecture with Langchain python library
-- Future work: Advance decision-making with AI agent system
+- Future work: Advanced decision-making with AI agent system
 
 
