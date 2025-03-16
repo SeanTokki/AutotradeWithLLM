@@ -1,10 +1,16 @@
 # Autotrade Bitcoin with LLM
 
-## LLM-based investment program and its web deployment
-- Front-end development using React.js
-- Back-end development using FastAPI, SQLite3, Nginx
-- Deployment using Docker, Google Cloud VM
-- Implement LLM architecture with Langchain python library
-- Future work: Advanced decision-making with AI agent system
+## Project Description
+- LLM-based investment program and its web deployment
+- Trade Bitcoin following LLM decision given every hour
+- Check trading status on webpage
+- Future work: advanced decision making with AI-agent system
+
+## Technichnologies Used 
+- Front-end development using **React.js**
+- Back-end development using **FastAPI, SQLite3, Nginx**
+- Deployment using **Docker, Google Cloud VM**
+- Implement LLM architecture with **Langchain** python library
+
 
 
